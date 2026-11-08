@@ -1,0 +1,583 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Sam 与 Dario 双轨年表</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700;900&family=Noto+Sans+SC:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: 双轨铁路图。上行 Sam，下行 Dario，中间夹 OpenAI / 交集 / Anthropic，横向按时间铺开；点卡片在下方展开事件档案 */
+:root{
+  --bg:#f3f5f7; --panel:#ffffff; --fg:#17202a; --muted:#5d6b78; --rule:#d5dce3; --wash:#eef1f4;
+  --sam:#1f6f8b; --sam-soft:#e2eff4;
+  --dario:#a0521d; --dario-soft:#f6e8dc;
+  --clash:#6b4fa0; --clash-soft:#ece7f5;
+  --fact:#2f7d4f; --report:#b07a12; --rumor:#b0385a;
+  --f-display:"Noto Serif SC","Songti SC",serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#12171c; --panel:#1a2128; --fg:#e6ebef; --muted:#93a1ad; --rule:#2c3640; --wash:#202931;
+  --sam:#5fb3d0; --sam-soft:#17313b; --dario:#e09a63; --dario-soft:#3a2617;
+  --clash:#a98ee0; --clash-soft:#2a2340; --fact:#62c08a; --report:#e0b04a; --rumor:#e57896; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171c; --panel:#1a2128; --fg:#e6ebef; --muted:#93a1ad; --rule:#2c3640; --wash:#202931;
+  --sam:#5fb3d0; --sam-soft:#17313b; --dario:#e09a63; --dario-soft:#3a2617;
+  --clash:#a98ee0; --clash-soft:#2a2340; --fact:#62c08a; --report:#e0b04a; --rumor:#e57896; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);line-height:1.65}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 40px;max-width:1400px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header h1{font-family:var(--f-display);font-weight:900;font-size:clamp(26px,4vw,40px);line-height:1.2;margin:0;text-wrap:balance}
+header h1 .s{color:var(--sam)} header h1 .d{color:var(--dario)}
+header p{margin:6px 0 0;color:var(--muted);max-width:68ch}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.chip{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--panel);color:var(--fg);padding:5px 12px;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip:focus-visible,.card:focus-visible,.rel button:focus-visible,.nav button:focus-visible{outline:2px solid var(--clash);outline-offset:2px}
+.dot{width:9px;height:9px;border-radius:50%}
+.dot.fact{background:var(--fact)} .dot.report{background:var(--report)} .dot.rumor{background:transparent;border:2px dashed var(--rumor)}
+.spacer{flex:1}
+.scroller{overflow-x:auto;background:var(--panel);border:1px solid var(--rule);border-radius:6px;position:relative}
+.board{position:relative}
+.axis{position:relative;height:34px;border-bottom:1px solid var(--rule)}
+.yr{position:absolute;top:0;bottom:0;border-left:1px solid var(--rule);padding:6px 8px;font-family:var(--f-mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.yr b{color:var(--fg);font-weight:500}
+.lane{position:relative;border-bottom:1px solid var(--rule)}
+.lane:last-child{border-bottom:0}
+.lane.sam{background:var(--sam-soft)} .lane.dario{background:var(--dario-soft)} .lane.clash{background:var(--clash-soft)}
+.lname{position:sticky;left:0;z-index:3;display:inline-block;margin:8px 0 0 8px;font-family:var(--f-display);font-weight:700;font-size:13px;padding:2px 8px;border-radius:3px;background:var(--panel);border:1px solid var(--rule)}
+.lane.sam .lname{color:var(--sam)} .lane.dario .lname{color:var(--dario)} .lane.clash .lname{color:var(--clash)}
+.gridline{position:absolute;top:0;bottom:0;width:1px;background:var(--rule);opacity:.6}
+.card{position:absolute;width:170px;height:62px;box-sizing:border-box;padding:6px 8px 6px 10px;background:var(--panel);border:1px solid var(--rule);border-radius:4px;cursor:pointer;text-align:left;font:inherit;color:var(--fg);overflow:hidden;display:flex;flex-direction:column;gap:1px}
+.card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--fact)}
+.card.report::before{background:var(--report)}
+.card.rumor{border:1.5px dashed var(--rumor)} .card.rumor::before{background:transparent}
+.card:hover{border-color:var(--muted)}
+.card .dt{font-family:var(--f-mono);font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.card .tt{font-size:12.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card.sel{box-shadow:0 0 0 2px var(--clash);z-index:2}
+
+.detail{background:var(--panel);border:1px solid var(--rule);border-radius:6px;padding:20px 22px;display:flex;flex-direction:column;gap:14px;scroll-margin-top:16px}
+.dhead{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between}
+.dhead .when{font-family:var(--f-mono);font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lanepill{font-family:var(--f-body);font-size:12px;padding:1px 8px;border-radius:3px;color:var(--panel)}
+.lanepill.sam{background:var(--sam)} .lanepill.dario{background:var(--dario)} .lanepill.clash{background:var(--clash)} .lanepill.oai,.lanepill.ant{background:var(--muted)}
+.detail h2{font-family:var(--f-display);font-size:clamp(20px,2.6vw,26px);line-height:1.3;margin:4px 0 0;text-wrap:balance}
+.tag{font-family:var(--f-body);font-size:12px;padding:0 7px;border-radius:3px;border:1px solid currentColor}
+.tag.fact{color:var(--fact)} .tag.report{color:var(--report)} .tag.rumor{color:var(--rumor)}
+.nav{display:flex;gap:8px}
+.nav button{font:inherit;font-size:13px;border:1px solid var(--rule);background:var(--panel);color:var(--fg);padding:5px 12px;border-radius:4px;cursor:pointer}
+.nav button:disabled{opacity:.35;cursor:default}
+.secs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.sec{background:var(--wash);border-radius:4px;padding:12px 14px;min-width:0}
+.sec h3{margin:0 0 4px;font-size:12px;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.sec p{margin:0;font-size:14.5px}
+.sec.main{grid-column:1/-1;background:transparent;padding:0}
+.sec.main p{font-size:15.5px;max-width:72ch}
+.verify{font-size:13.5px;color:var(--muted);border-left:3px solid var(--rule);padding-left:10px;max-width:72ch}
+.verify.report{border-color:var(--report)} .verify.rumor{border-color:var(--rumor)} .verify.fact{border-color:var(--fact)}
+.rel h3{margin:0 0 6px;font-size:12px;letter-spacing:.08em;color:var(--muted)}
+.rel ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.rel button{font:inherit;font-size:13px;background:var(--panel);border:1px solid var(--rule);border-radius:4px;padding:3px 10px;cursor:pointer;color:var(--fg);text-align:left}
+.rel button .m{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:6px}
+.dsrc{font-size:13px;color:var(--muted)} .dsrc a{color:var(--clash)}
+
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;font-size:13.5px;color:var(--muted)}
+.notes h3{font-family:var(--f-display);color:var(--fg);font-size:15px;margin:0 0 4px}
+.notes p{margin:0}
+.src{font-size:12.5px;color:var(--muted)} .src a{color:var(--muted)}
+.src ul{margin:4px 0 0;padding-left:18px;columns:2 280px}
+@media (prefers-reduced-motion:no-preference){.scroller{scroll-behavior:smooth}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1><span class="s">Sam Altman</span> 与 <span class="d">Dario Amodei</span></h1>
+    <p>从 2015 年 OpenAI 成立前夜到 2026 年 10 月。上方是 Sam 和 OpenAI，下方是 Anthropic 和 Dario，中间一条是两人的直接交集。实线卡片为已证实，黄色为媒体或书籍披露，虚线为网传和舆论解读。点任意卡片，下方展开这件事的背景、经过和后续。</p>
+  </header>
+
+  <div class="controls" role="group" aria-label="筛选">
+    <button class="chip" id="f-fact" data-k="fact" aria-pressed="true"><span class="dot fact"></span>已证实</button>
+    <button class="chip" id="f-report" data-k="report" aria-pressed="true"><span class="dot report"></span>媒体/书籍披露</button>
+    <button class="chip" id="f-rumor" data-k="rumor" aria-pressed="true"><span class="dot rumor"></span>网传/解读</button>
+    <span class="spacer"></span>
+    <button class="chip" id="go-start">回到 2015</button>
+    <button class="chip" id="go-end">跳到最近</button>
+  </div>
+
+  <div class="scroller" id="scroller"><div class="board" id="board"></div></div>
+
+  <section class="detail" id="detail" aria-live="polite"></section>
+
+  <section class="notes">
+    <div><h3>两人怎么认识的</h3><p>最早的交集很可能是 2015 年马斯克召集的 Rosewood 晚宴，Dario 在受邀之列，Altman 在场，但他本人是否出席没有明确记录。确定的共事起点是 2016 年他从 Google Brain 加入 OpenAI。</p></div>
+    <div><h3>三种标签的意思</h3><p>"已证实"指公司公告、法院记录或当事人本人确认。"披露"多来自 WSJ、The Information、《纽约客》和 Keach Hagey 的书，信源匿名或单方。"网传"是社交媒体的段子和对事件的过度解读。</p></div>
+    <div><h3>截止时间</h3><p>收录到 2026 年 10 月 19 日。Anthropic 上市的具体日期、OpenAI 上市推迟到哪年，目前都还是报道，不是官宣。</p></div>
+  </section>
+
+  <section class="src" id="sources"><b>主要来源</b><ul></ul></section>
+</div>
+
+<script>
+const LANES=[
+  {k:"sam",name:"Sam Altman"},{k:"oai",name:"OpenAI"},{k:"clash",name:"两人交集"},{k:"ant",name:"Anthropic"},{k:"dario",name:"Dario Amodei"}
+];
+const S={
+ kant:["Big Technology：The Making of Dario Amodei","https://www.bigtechnology.com/p/the-making-of-dario-amodei"],
+ aol:["Business Insider 双方恩怨时间线","https://www.aol.com/articles/tense-corporate-split-viral-photo-095901567.html"],
+ wiki:["Wikipedia: Dario Amodei","https://en.wikipedia.org/wiki/Dario_Amodei"],
+ giga:["GIGAZINE 转述 WSJ 与《The Optimist》","https://gigazine.net/gsc_news/en/20260628-dario-amodei-sam-altman/"],
+ hvy:["Hvylya 转述 WSJ 报道","https://en.hvylya.net/news/1697-shouting-matches-and-power-plays-wsj-details-the-feuds-that-split-openai"],
+ fortmemo:["Fortune：Amodei 为备忘录语气道歉","https://fortune.com/2026/03/06/anthropic-openai-ceo-apologizes-leaked-memo-supply-chain-risk-designation"],
+ fast:["Fast Company：印度峰会合影","https://www.fastcompany.com/91495508/altman-amodei-india-ai-summit-photo"],
+ claw:["Storyboard18：龙虾钳梗图","https://storyboard18.com/brand-makers/chatgpts-lobster-claw-edit-of-awkward-altman-amodei-hand-raise-sparks-claude-vs-openclaw-chatter-online-90183.htm"],
+ sb:["Tom's Guide：Altman 回应超级碗广告","https://www.tomsguide.com/ai/chatgpt/so-clearly-dishonest-sam-altman-responds-to-anthropics-super-bowl-ad-targeting-chatgpt-heres-what-he-said"],
+ ny:["Semafor 转述《纽约客》调查","https://www.semafor.com/article/04/06/2026/new-yorker-investigation-raises-questions-over-sam-altmans-trustworthiness"],
+ molo:["Al Jazeera：Altman 住所遇袭","https://www.aljazeera.com/amp/news/2026/4/10/openai-ceo-sam-altmans-home-targeted-in-molotov-cocktail-attack"],
+ musk:["Al Jazeera：马斯克诉 OpenAI 败诉","https://www.aljazeera.com/news/2026/5/18/elon-musk-loses-lawsuit-against-openai"],
+ ipo:["Ground News 转述 NYT：OpenAI IPO 或推迟","https://ground.news/article/openai-leans-toward-waiting-until-next-year-for-ipo-nyt-reports_895343"],
+ gpt56:["DataNorth：GPT-5.6 发布","https://datanorth.ai/news/openai-releases-gpt-5-6-sol-terra-and-luna"],
+ hf:["Bloomberg Tax：OpenAI 模型入侵 Hugging Face","https://news.bloombergtax.com/states-of-play/openai-says-its-ai-caused-hugging-face-cyber-breach-1"],
+ gpt6:["GPT-6 Astra 发布时间整理","https://redreamality.com/garden/questions/gpt-6-astra-release-date/"],
+ devday:["DevDay 2026 发布汇总","https://agentpedia.codes/blog/openai-devday-2026-everything-announced"],
+ npr:["WUNC/NPR：AI CEO 呼吁放缓","https://www.wunc.org/2026-09-13/ai-ceos-call-for-industry-slowdown"],
+ axios:["Axios：白宫超级智能协议","https://axios.com/2026/09/30/ai-constitution-trump-white-house"],
+ fortbad:["Fortune：Altman 谈接受“坏事”","https://fortune.com/2026/10/05/sam-altman-ai-risks-bad-things-benefits-trump-voluntary-safety-pact-openai-regulation/"],
+ s1:["5paisa：Anthropic 秘密递交 S-1","https://www.5paisa.com/blog/anthropic-files-confidentially-for-ipo-what-we-know"],
+ ipoant:["FinanceFeeds：Anthropic IPO 时间线","https://financefeeds.com/anthropics-14-october-investor-day-nears-but-its-s-1-still-isnt-public-the-ipo-timeline-explained/"],
+ fund:["TechCrunch：Anthropic 公益基金","https://techcrunch.com/2026/10/18/anthropic-says-its-committing-5-of-its-shares-to-a-public-benefit-fund"],
+ glass:["GIGAZINE：Mythos 与 Glasswing","https://gigazine.net/gsc_news/en/20260408-anthropic-claude-mythos-project-glasswing"],
+ four:["Let's Data Science：Anthropic 四起网络事件","https://letsdatascience.com/news/anthropic-report-details-four-ai-cybersecurity-incidents-8de6a369"],
+ opus55:["TechNews：Opus 5.5 发布","https://technews.tw/2026/09/23/anthropic-upgrades-claude-with-new-opus-5-5-model/"],
+ fable:["Anthropic：Fable 与 Mythos 访问声明","https://www.anthropic.com/news/fable-mythos-access"]
+};
+/* 字段：d 日期，l 泳道，t 可信度，h 标题，x 经过，bg 背景，af 后来/影响，v 可信度说明，s 来源 */
+const E=[
+ {d:"2015.07",l:"oai",t:"fact",h:"Rosewood 晚宴",
+  bg:"2015 年谷歌刚收购 DeepMind 不久，马斯克和 Altman 都担心最强的 AI 被一家大公司垄断。",
+  x:"马斯克、Altman、Greg Brockman 等人在门洛帕克的 Rosewood 酒店聚餐，邀请了一批顶尖 AI 研究者，讨论能不能从大公司手里挖人，做一个不以盈利为目的的实验室。饭桌上很多研究者对能否挖动人持怀疑态度，Brockman 则当场表示愿意全职去做。",
+  af:"这顿饭被普遍视为 OpenAI 的起点。半年后 OpenAI 正式成立。",s:["kant"]},
+ {d:"2015.07",l:"clash",t:"report",h:"Rosewood 晚宴：可能的初次见面",
+  bg:"Dario 当时刚离开百度，是深度学习圈里小有名气的研究者。",
+  x:"据 Alex Kantrowitz 的 Dario 人物特稿，马斯克邀请了 Dario 和一批顶尖研究者参加这场晚宴，Altman、Brockman、Sutskever 都在。Dario 当时考虑过加入，但对这个刚起步的组织没把握，最终选择了 Google Brain。",
+  af:"如果他到场了，这就是两人能追溯到的最早交集。约十个月后他改变主意加入 OpenAI。",
+  v:"报道只写了 Dario 受邀，没写明他本人是否出席，所以\"这是初次见面\"属于合理推测。",s:["kant"]},
+ {d:"2015.12",l:"sam",t:"fact",h:"兼任 OpenAI 联席主席",
+  bg:"Altman 2014 年起任 Y Combinator 总裁，是硅谷最有影响力的创业导师之一。",
+  x:"OpenAI 成立时，Altman 与马斯克并列联席主席。他的主业仍是 YC，OpenAI 更像是他投钱、找人、搭架子的副业。",
+  af:"直到 2019 年他才离开 YC 全职做 OpenAI。"},
+ {d:"2015.12.11",l:"oai",t:"fact",h:"OpenAI 成立",
+  bg:"创始团队承诺研究成果尽量公开，不受股东回报约束。",
+  x:"以非营利机构形式宣布成立，Altman、马斯克、Brockman、Sutskever 等人为创始成员，宣布的捐款承诺总额 10 亿美元（实际到账远低于此）。",
+  af:"\"非营利\"的承诺后来成了马斯克起诉 OpenAI 的核心争议。"},
+ {d:"2016.07",l:"dario",t:"fact",h:"从 Google Brain 加入 OpenAI",
+  bg:"Dario 是普林斯顿生物物理博士，做过斯坦福医学院博士后，2014 年底转入 AI，在百度参与过 Deep Speech 2 语音识别项目。",
+  x:"在 Google Brain 待了大约十个月后，他决定加入 OpenAI，起初主要做 AI 安全方向的研究。在谷歌期间他参与写过《AI 安全中的具体问题》这篇很有影响的论文。",
+  af:"此后他在 OpenAI 一路升到研究副总裁，是 GPT-2、GPT-3 和缩放定律的核心人物。",s:["wiki","kant"]},
+ {d:"2016.08",l:"clash",t:"fact",h:"两人成为同事",
+  bg:"OpenAI 当时只有几十个人，Altman 还没当 CEO，日常管理主要是 Brockman 和 Sutskever。",
+  x:"Dario 入职后，与 Altman 进入同一个组织。这是有确切记录的两人共事起点。",
+  af:"接下来四年两人的关系从合作逐渐变成互不信任。",s:["wiki","kant"]},
+ {d:"2016.10",l:"clash",t:"report",h:"合租公寓里的争论",
+  bg:"OpenAI 早期几位成员住得很近，有的直接合租。",
+  x:"据 Keach Hagey 的 Altman 传记《The Optimist》：Dario 与 Brockman 同住时争论过，AI 的关键进展应该先公开给美国公众，还是先告诉政府。Brockman 主张前者，Dario 主张敏感内容先给政府。",
+  af:"Brockman 后来把这次争论看作两家公司思路分歧的缩影：OpenAI 偏向产品化和公开，Anthropic 偏向与政府合作、控制扩散。",
+  v:"来自传记作者的采访，没有其他当事人公开证实。",s:["giga"]},
+ {d:"2017.06",l:"dario",t:"report",h:"想过辞职",
+  bg:"2017 年 OpenAI 开始意识到做大模型需要巨额算力，钱从哪来成了大问题。",
+  x:"据报道，Brockman 提出可以把 AGI 卖给世界各国政府，包括联合国安理会的核大国。Dario 认为这近乎叛国，一度考虑离职。同年马斯克要求列出每个员工的贡献，随后约一到两成员工被裁，Dario 认为这种做法不必要地残忍。",
+  af:"这两件事被认为是他对 OpenAI 管理层失去信任的开端。",
+  v:"WSJ 和 Hagey 的书都有提及，信源匿名。",s:["giga","hvy"]},
+ {d:"2018.02",l:"oai",t:"fact",h:"马斯克退出董事会",
+  bg:"马斯克曾提议由他来全面掌控 OpenAI，或并入特斯拉，被其他创始人拒绝。",
+  x:"马斯克以避免与特斯拉 AI 业务利益冲突为由离开董事会，并停止了大部分捐款。",
+  af:"Altman 成为实际掌舵人，OpenAI 失去主要金主，开始寻找新的融资方式。"},
+ {d:"2018.04",l:"clash",t:"report",h:"“留下的条件”",
+  bg:"马斯克走后 OpenAI 一度人心浮动，几位核心研究员都在考虑去留。",
+  x:"据报道，Dario 同意留下的条件之一，是 Brockman 和 Sutskever 不能直接管他。Altman 答应了。后来 Brockman 对 Dario 说董事会有权罢免 Altman，Dario 由此认为 Altman 当初的承诺并不牢靠。",
+  af:"这个\"承诺没兑现\"的感受被认为是两人后来决裂的伏笔。",
+  v:"来自 Hagey 的书，Altman 方面没有公开回应细节。",s:["giga"]},
+ {d:"2019.02",l:"oai",t:"fact",h:"GPT-2 分阶段发布",
+  bg:"GPT-2 在当时生成文本的能力明显超出预期。",
+  x:"OpenAI 以\"可能被用来批量制造假新闻\"为由，先只放出小模型，几个月后才逐步公开完整版本。Dario 是这一决策的主要推动者之一。",
+  af:"这次\"负责任发布\"的尝试当时被不少人批评为炒作，但后来成了行业分阶段发布的先例。"},
+ {d:"2019.03",l:"sam",t:"fact",h:"离开 YC，出任 OpenAI CEO",
+  bg:"非营利结构拿不到训练大模型所需的钱。",
+  x:"Altman 卸任 YC 总裁，全职出任 OpenAI CEO。同月 OpenAI 设立\"利润封顶\"的子公司 OpenAI LP，投资人回报设上限，超出部分归非营利母体。",
+  af:"这个结构为微软投资铺了路，也让一部分研究员担心公司方向会被商业压力带偏。"},
+ {d:"2019.07",l:"oai",t:"fact",h:"微软投资 10 亿美元",
+  bg:"OpenAI 需要大量云算力，微软需要追赶谷歌的 AI 能力。",
+  x:"微软注资 10 亿美元，成为 OpenAI 的独家云服务商，并获得部分技术的商业化权利。",
+  af:"与微软的深度绑定从这里开始。据多方报道，这也是 Dario 一派对公司方向不满的原因之一。"},
+ {d:"2019.09",l:"dario",t:"fact",h:"升任研究副总裁",
+  bg:"Dario 团队此时正在系统研究模型规模、数据量和性能之间的关系。",
+  x:"他升任研究副总裁，主导 GPT-2、GPT-3 及缩放定律研究。据报道，他曾阻止 Brockman 加入大语言模型项目，妹妹 Daniela 甚至表示宁可自己辞职也不让 Brockman 进组，Altman 最后站在了 Amodei 兄妹一边。",
+  af:"缩放定律论文（2020 年 1 月）后来成为整个大模型行业\"堆规模\"路线的理论基础。",s:["giga","hvy"]},
+ {d:"2020.03",l:"clash",t:"report",h:"互评风波",
+  bg:"Daniela Amodei 当时负责 OpenAI 的安全与政策团队，管理风格强势。",
+  x:"据 WSJ：Altman 让高管互写评价。Brockman 写了一份批评 Daniela 的评价，说她滥用权力、用官僚流程达成目的。Altman 事先看过，称其\"严厉但公平\"。Daniela 写了逐条反驳，Brockman 随后提出撤回。",
+  af:"Amodei 兄妹认为 Altman 默许了这次针对，信任进一步破裂。",
+  v:"WSJ 匿名信源，当事人未公开回应细节。",s:["hvy"]},
+ {d:"2020.05",l:"oai",t:"fact",h:"GPT-3 发布",
+  bg:"Dario 团队验证了模型越大能力越强的规律，决定把规模推到 1750 亿参数。",
+  x:"GPT-3 论文发布，一作 Tom Brown，作者中包括 Dario 和多位后来的 Anthropic 联创。6 月开放 API，OpenAI 第一次有了正式商业产品。",
+  af:"GPT-3 让 OpenAI 有了收入，也让\"商业化速度\"和\"安全优先\"的分歧变得更尖锐。"},
+ {d:"2020.08",l:"clash",t:"report",h:"会议室争吵",
+  bg:"高管之间的关系在这一年持续恶化。",
+  x:"据 WSJ：Altman 在一次会上指责 Amodei 兄妹在背后鼓动别人向董事会提交对他的负面反馈。在场的第三位高管表示自己对此毫不知情后，Altman 又否认自己说过这话，Amodei 兄妹当场冲他大吼。",
+  af:"报道称这次冲突之后，双方关系基本无法修复。",
+  v:"日期为大致推断。细节来自 WSJ 匿名信源，Altman 未公开回应。",s:["hvy","giga"]},
+ {d:"2020.12",l:"clash",t:"fact",h:"分道扬镳",
+  bg:"OpenAI 准备进一步商业化，微软合作深化。",
+  x:"Dario、Daniela 和约十几位同事陆续离开 OpenAI。据报道，他们离开前曾提出直接向董事会汇报、不与 Brockman 共事等条件，谈判破裂。对外的说法是在安全和发展路线上理念不同。",
+  af:"这批人几个月后创立 Anthropic，OpenAI 一次失去了 GPT-3 和安全团队的大量骨干。",
+  v:"离职本身是事实，谈判条件来自 WSJ 和书籍披露。",s:["giga","aol"]},
+ {d:"2021.01",l:"ant",t:"fact",h:"Anthropic 成立",
+  bg:"创始团队希望做一家把安全研究放在产品前面的 AI 公司。",
+  x:"注册为公益公司（PBC），联合创始人包括 Dario、Daniela、Jared Kaplan、Tom Brown、Chris Olah、Sam McCandlish、Jack Clark 等。早期投资方包括 Jaan Tallinn 和后来出事的 FTX 创始人 Sam Bankman-Fried。",
+  af:"头两年公司几乎不做公开产品，主要发表对齐和可解释性研究。"},
+ {d:"2021.03",l:"dario",t:"fact",h:"出任 Anthropic CEO",
+  bg:"Dario 此前从未当过管理者以外的公司负责人。",
+  x:"Dario 任 CEO，妹妹 Daniela 任总裁，兄妹分管研究和运营。",
+  af:"之后几年他逐渐从\"安全派研究员\"变成行业里最常出现在政策场合的 CEO 之一。",s:["wiki"]},
+ {d:"2022.11.30",l:"oai",t:"fact",h:"ChatGPT 上线",
+  bg:"Anthropic 当时已经有能力相近的内部模型，但选择不急着发布。",
+  x:"OpenAI 以\"研究预览\"名义推出 ChatGPT，五天用户破百万，两个月破亿，成为史上增长最快的消费应用。",
+  af:"整个行业被迫提速。Dario 后来多次说，Anthropic 当时推迟发布是有意避免加剧竞赛，但也因此错过了先发位置。"},
+ {d:"2023.03.14",l:"ant",t:"fact",h:"Claude 首发",
+  bg:"ChatGPT 爆火后，Anthropic 决定推出自己的产品。",
+  x:"Claude 正式开放，主打更不容易输出有害内容。同一天 OpenAI 发布了 GPT-4，Claude 的声量几乎被完全盖过。",
+  af:"此后两家的模型发布时间经常撞在一起。"},
+ {d:"2023.03.15",l:"oai",t:"fact",h:"GPT-4 发布",
+  bg:"GPT-4 早在 2022 年夏天就训练完成，内部测试了半年多。",
+  x:"GPT-4 发布，在律师资格考试等多项测试中达到人类前列水平。技术报告几乎不披露训练细节，被批评与\"Open\"之名不符。",
+  af:"GPT-4 确立了 OpenAI 一年多的领先地位。"},
+ {d:"2023.05.16",l:"sam",t:"fact",h:"美国参议院作证",
+  bg:"ChatGPT 引发全球对 AI 风险的关注，国会开始召开听证。",
+  x:"Altman 在参议院司法委员会作证，主动呼吁监管，建议设立发放许可证的联邦机构，表现被普遍评价为友好、配合。",
+  af:"批评者认为这是为大公司设门槛，后来他对具体监管法案的立场也多次变化。"},
+ {d:"2023.07.25",l:"dario",t:"fact",h:"参议院作证",
+  bg:"Anthropic 一直把生物安全视为 AI 最紧迫的风险之一。",
+  x:"Dario 在参议院听证会上警告，AI 可能在两三年内大幅降低制造生物武器的门槛，建议对前沿模型做强制安全测试并管控芯片出口。",
+  af:"这次作证奠定了他在华盛顿\"风险警告者\"的形象。",s:["wiki"]},
+ {d:"2023.09",l:"ant",t:"fact",h:"亚马逊投资最高 40 亿美元",
+  bg:"训练前沿模型需要的资金越来越多。",
+  x:"亚马逊宣布投资最高 40 亿美元，AWS 成为 Anthropic 主要云服务商。谷歌也追加了投资。",
+  af:"格局变成：微软押 OpenAI，亚马逊和谷歌押 Anthropic。"},
+ {d:"2023.10",l:"clash",t:"report",h:"Toner 论文风波",
+  bg:"OpenAI 董事会中有几位成员长期关注 AI 安全。",
+  x:"据 NYT 等报道：董事 Helen Toner 合著了一篇论文，称赞 Anthropic 推迟发布 Claude 的做法更稳妥，并暗批 OpenAI 发布 ChatGPT 加剧了竞赛。Altman 对此非常不满，认为董事批评自家公司不妥，并试图推动她离开董事会。",
+  af:"一个月后，正是包括 Toner 在内的董事会成员解雇了 Altman。Anthropic 在这件事里是被引用的对象，没有直接参与。",
+  v:"Altman 不满的细节来自报道，Toner 本人后来接受采访时也谈过此事。"},
+ {d:"2023.11.17",l:"sam",t:"fact",h:"被董事会解雇",
+  bg:"董事会与 Altman 之间积累了多次信任问题。",
+  x:"OpenAI 董事会突然宣布解雇 Altman，理由是他\"与董事会沟通不坦诚\"。Brockman 随即辞职，微软宣布要招揽二人。超过 700 名员工联名威胁集体出走。",
+  af:"五天后 Altman 复职，反对他的董事大多离开董事会。"},
+ {d:"2023.11.19",l:"clash",t:"report",h:"董事会找过 Dario",
+  bg:"Altman 被解雇后，董事会急需找到能稳住公司的人。",
+  x:"据 The Information 等报道：在这几天里，OpenAI 董事会联系过 Dario，询问他是否愿意接任 CEO，同时探讨两家公司合并的可能。Dario 两项都拒绝了。",
+  af:"这件事说明在当时的董事会眼里，Dario 是少数被认为能替代 Altman 的人选。",
+  v:"由多家媒体报道，Dario 和 OpenAI 都没有公开详谈。",s:["wiki","aol"]},
+ {d:"2023.11.22",l:"oai",t:"fact",h:"Altman 复职，董事会改组",
+  bg:"员工、投资人和微软都站在 Altman 一边。",
+  x:"OpenAI 宣布 Altman 回归 CEO，董事会改组，Toner 等人离开，前 Salesforce 联席 CEO Bret Taylor 任主席，Larry Summers 加入。",
+  af:"Sutskever 留在公司但基本淡出，半年后离职。董事会的制衡作用被普遍认为大幅减弱。"},
+ {d:"2024.01",l:"sam",t:"fact",h:"与 Oliver Mulherin 结婚",
+  bg:"两人交往多年，Mulherin 是澳大利亚软件工程师。",
+  x:"Altman 与 Mulherin 在夏威夷举行婚礼。",
+  af:"2025 年两人的第一个孩子出生。"},
+ {d:"2024.03",l:"ant",t:"fact",h:"Claude 3 系列",
+  bg:"此前 Claude 2 的能力与 GPT-4 有明显差距。",
+  x:"发布 Haiku、Sonnet、Opus 三档模型，Opus 在多项评测上首次与 GPT-4 打平甚至略胜。",
+  af:"Anthropic 第一次在能力上被视为真正的头部竞争者。"},
+ {d:"2024.05",l:"oai",t:"fact",h:"Sutskever 离职，超级对齐团队解散",
+  bg:"OpenAI 曾承诺把 20% 的算力投入\"超级对齐\"安全研究。",
+  x:"Sutskever 宣布离职，超级对齐团队负责人 Jan Leike 同时离开，公开说公司的安全文化让位于光鲜产品。团队随后被解散。同月还爆出离职员工被要求签不贬损协议才能保留股权，Altman 道歉并取消了这一条款。",
+  af:"Leike 随后加入 Anthropic，此后多名 OpenAI 安全研究员跳槽到 Anthropic。"},
+ {d:"2024.06",l:"ant",t:"fact",h:"Claude 3.5 Sonnet",
+  bg:"开发者市场是两家争夺的关键。",
+  x:"Claude 3.5 Sonnet 发布，编程能力明显领先，配合新推出的 Artifacts 功能，在开发者圈口碑迅速上升。",
+  af:"\"写代码用 Claude\"从这时开始成为很多程序员的共识，也是之后 Claude Code 爆发的基础。"},
+ {d:"2024.09",l:"oai",t:"fact",h:"o1 发布；Murati 离职",
+  bg:"单纯扩大预训练规模的收益开始放缓。",
+  x:"OpenAI 发布 o1，模型先\"思考\"再回答，开启推理模型路线。同月 CTO Mira Murati 和多名高管离职，OpenAI 同时推进从非营利控制转向营利公司的改制。",
+  af:"推理模型很快被各家跟进。Murati 后来创办了 Thinking Machines Lab。"},
+ {d:"2024.10",l:"dario",t:"fact",h:"《Machines of Loving Grace》",
+  bg:"外界长期把 Dario 看成\"末日派\"。",
+  x:"Dario 发表约一万五千字长文，描绘 AI 顺利发展后的图景：几年内把生物医学进步压缩到十倍速度、治愈多数疾病、推动发展中国家经济增长。",
+  af:"文章被视为他公开形象的转折，也被拿来和 Altman 的乐观叙事对比。"},
+ {d:"2025.01.06",l:"sam",t:"fact",h:"妹妹 Annie 提起民事诉讼",
+  bg:"Annie Altman 此前多年在社交媒体上发表过相关说法。",
+  x:"Annie 在密苏里州联邦法院起诉，指控童年时期遭受侵害。Altman 与母亲、两个弟弟发表联合声明，称指控完全不实，并表示担忧她的身心状况。",
+  af:"案件仍在法律程序中。",
+  v:"起诉是公开法院记录。指控本身未经法院认定，Altman 一方明确否认。"},
+ {d:"2025.01.21",l:"oai",t:"fact",h:"星际之门 5000 亿美元",
+  bg:"特朗普第二任期刚开始，大力推动 AI 基础设施。",
+  x:"OpenAI 与软银、甲骨文在白宫宣布\"星际之门\"计划，四年内投资最高 5000 亿美元建设数据中心。马斯克当即在网上质疑他们根本没这么多钱。",
+  af:"OpenAI 的算力承诺此后持续膨胀，到 2026 年预计 2030 年前硬件支出约 6000 亿美元。"},
+ {d:"2025.02",l:"sam",t:"fact",h:"儿子出生",
+  bg:"",
+  x:"Altman 在社交媒体上宣布孩子出生，此前他多次公开表达想要孩子。",
+  af:"他之后在采访里常说，有孩子改变了他对 AI 未来的想法。"},
+ {d:"2025.02.24",l:"ant",t:"fact",h:"Claude Code 预览",
+  bg:"Claude 已经是最受欢迎的编程模型。",
+  x:"随 Claude 3.7 Sonnet 一起推出 Claude Code，一个在终端里直接干活的编程智能体。",
+  af:"Claude Code 成为 Anthropic 收入增长的主力，到 2026 年 Anthropic 二季度收入同比增长超过十倍。"},
+ {d:"2025.04",l:"dario",t:"fact",h:"入选《时代》百大",
+  bg:"",
+  x:"Dario 入选《时代》2025 年百位最具影响力人物。同年 12 月，他与 Altman 等人一起入选《时代》年度人物\"AI 架构师\"群像。",
+  af:"2026 年他与妹妹 Daniela 再次一同入选百大。",s:["wiki"]},
+ {d:"2025.05.22",l:"ant",t:"fact",h:"Claude 4",
+  bg:"",
+  x:"Opus 4 与 Sonnet 4 发布，Opus 4 首次被 Anthropic 按更高一级的安全等级（ASL-3）防护部署。",
+  af:"安全报告里关于模型在测试中试图\"勒索\"工程师的情景实验引发广泛讨论。"},
+ {d:"2025.09",l:"ant",t:"fact",h:"15 亿美元作家版权和解",
+  bg:"作家们起诉 Anthropic 使用盗版电子书训练模型。",
+  x:"法官此前认定用合法购买的书训练属于合理使用，但从盗版网站下载书籍不是。Anthropic 随后同意支付 15 亿美元和解，按每本书约 3000 美元计。",
+  af:"这是 AI 版权诉讼中迄今最大的一笔和解。同月 Dario 公开估计 AI 有 25% 的概率\"非常非常糟糕\"。"},
+ {d:"2025.10.28",l:"oai",t:"fact",h:"重组为公益公司",
+  bg:"改制计划经过加州和特拉华州总检察长一年多审查。",
+  x:"OpenAI 完成重组，营利部分变为公益公司，非营利基金会保留控股，微软持股约 27%。",
+  af:"重组为上市扫清了结构障碍，也让马斯克的诉讼焦点更加集中。"},
+ {d:"2026.01",l:"dario",t:"fact",h:"《The Adolescence of Technology》",
+  bg:"距上一篇乐观长文一年多。",
+  x:"Dario 发表新长文，这次重点讨论 AI 风险，包括权力集中、失控和社会冲击，可以看作对《Machines of Loving Grace》的另一面补充。",
+  af:"",s:["wiki"]},
+ {d:"2026.01.16",l:"oai",t:"fact",h:"ChatGPT 开始测试广告",
+  bg:"OpenAI 的支出远超收入，需要新的变现方式。",
+  x:"OpenAI 宣布在美国的免费版和低价档位测试广告，承诺广告不影响回答内容。",
+  af:"这直接引出了下个月 Anthropic 的超级碗广告。"},
+ {d:"2026.02.08",l:"clash",t:"fact",h:"超级碗广告战",
+  bg:"OpenAI 刚宣布在 ChatGPT 里加广告。",
+  x:"Anthropic 在超级碗投放系列广告，讽刺 AI 聊天时突然插入推销，广告里没点名但矛头明显指向 ChatGPT，并表示 Claude 不会有广告。Altman 在 X 上发长帖回应，说广告好笑，但\"明显不诚实\"，还反过来批评 Anthropic 只服务有钱人、想控制别人怎么用 AI。",
+  af:"Altman 的回应被很多网友认为反应过度，反而给广告带来更多关注。",s:["sb"]},
+ {d:"2026.02.19",l:"clash",t:"fact",h:"印度峰会：没牵手",
+  bg:"新德里 AI 影响力峰会，十几位 AI 公司领导人同台。",
+  x:"莫迪邀请所有人手拉手举起来合影，其他人都牵上了，相邻的 Altman 和 Dario 却没有牵，愣了几秒后各自举起拳头。Altman 事后对媒体说他当时没搞懂台上要做什么，Anthropic 没有评论。",
+  af:"这张照片成了 2026 年两家竞争最出圈的画面。",s:["fast"]},
+ {d:"2026.02.21",l:"clash",t:"rumor",h:"“世纪不和”与龙虾钳梗图",
+  bg:"峰会合影在中外社交媒体疯传。",
+  x:"网上大量解读为两人当众冷战。有人用 ChatGPT 把两人举起的拳头 P 成龙虾钳，借开源智能体 OpenClaw 的名字玩\"Claude vs OpenClaw\"的梗。",
+  af:"",
+  v:"纯属舆论解读和玩梗，两位当事人都没有说过这是有意为之。",s:["claw"]},
+ {d:"2026.02.27",l:"clash",t:"fact",h:"五角大楼事件",
+  bg:"国防部要求 AI 供应商接受\"任何合法用途\"条款。",
+  x:"Anthropic 拒绝删除合同里禁止用 Claude 做大规模国内监控和全自主武器的条款，谈判破裂。国防部长 Hegseth 宣布把 Anthropic 列为\"供应链风险\"，政府下令联邦机构停用 Claude。几小时后，政府宣布与 OpenAI 签约。",
+  af:"OpenAI 被批评趁火打劫，Anthropic 则准备起诉政府。",s:["fortmemo","wiki"]},
+ {d:"2026.02.28",l:"oai",t:"fact",h:"与五角大楼签约",
+  bg:"OpenAI 声称它的合同里也有类似的安全限制。",
+  x:"OpenAI 与国防部的协议公布后受到舆论质疑。几天内 OpenAI 承认这笔交易看起来\"草率且投机\"，重新谈判，加入了限制情报机构使用的条款。",
+  af:"",s:["fortmemo"]},
+ {d:"2026.03.02",l:"clash",t:"fact",h:"内部备忘录泄露",
+  bg:"五角大楼事件发生后数小时内，Dario 给全体员工写了一封信。",
+  x:"这封备忘录被 The Information 曝光。信中称 OpenAI 的做法是\"安全表演\"，称 Altman 关于合同限制的公开说法是\"彻头彻尾的谎言\"，还说部分 OpenAI 员工太容易被说服。",
+  af:"这是 Dario 对 Altman 最直接、最激烈的公开（虽然是被泄露的）批评。",s:["fortmemo"]},
+ {d:"2026.03.05",l:"dario",t:"fact",h:"为备忘录语气道歉",
+  bg:"备忘录泄露后投资人担心局势升级，希望缓和。",
+  x:"Dario 公开为备忘录的语气道歉，表示那是情绪化时写的，不代表他深思熟虑后的看法。同一天 Anthropic 确认收到正式的\"供应链风险\"认定通知，Altman 也间接批评了 Anthropic。",
+  af:"他道歉的是语气，没有收回对合同条款的实质批评。",s:["fortmemo"]},
+ {d:"2026.03.26",l:"ant",t:"fact",h:"法院暂时叫停国防部禁令",
+  bg:"Anthropic 起诉政府，认为认定是对其公开立场的报复。",
+  x:"联邦法官发出临时禁令，认为政府的做法存在报复第一修正案言论自由的迹象。",
+  af:"禁令让 Anthropic 暂时恢复了部分政府业务，诉讼仍在进行。",s:["wiki"]},
+ {d:"2026.04.06",l:"sam",t:"report",h:"《纽约客》调查",
+  bg:"关于 Altman 诚信的质疑从 2023 年被解雇时就一直存在。",
+  x:"Ronan Farrow 与 Andrew Marantz 发表长篇调查，收集了多位与 Altman 共事过的人写下的内部备忘录，列举了一系列被指控的隐瞒和操纵行为。部分前董事认为，这些材料说明 Altman 手握影响人类未来的权力，却不值得信任。",
+  af:"报道引发新一轮对 OpenAI 治理的讨论。四天后他的住所遭到袭击，警方未公布动机。",
+  v:"属于调查报道，指控来自当事人的备忘录和匿名采访，Altman 方面否认存在系统性问题。",s:["ny"]},
+ {d:"2026.04.07",l:"clash",t:"report",h:"Dario 的备忘录被提及",
+  bg:"",
+  x:"《纽约客》称，那批质疑 Altman 的内部备忘录里包括 Dario 当年在 OpenAI 时写的，但没有公开具体内容。",
+  af:"这让外界第一次知道 Dario 在离开前曾留下书面记录。",
+  v:"只有报道提及，内容未公开，Dario 没有回应。",s:["ny"]},
+ {d:"2026.04.07",l:"ant",t:"fact",h:"Mythos Preview 与 Glasswing",
+  bg:"模型的网络攻防能力已经强到能自主发现大量软件漏洞。",
+  x:"Anthropic 公布能力高于 Opus 的新一档模型 Claude Mythos Preview，但不公开发布，只通过\"Glasswing 计划\"提供给少数合作机构，用来提前修补关键软件的漏洞。",
+  af:"这是头部实验室第一次主动把最强模型扣在手里，只做防御用途。",s:["glass"]},
+ {d:"2026.04.10",l:"sam",t:"fact",h:"住所遭燃烧瓶袭击",
+  bg:"",
+  x:"凌晨 4 点左右，一名 20 岁男子向 Altman 在旧金山的住所扔燃烧瓶，点燃了部分外门。约一小时后他在 OpenAI 总部附近被捕，被指扬言要烧掉大楼。无人受伤。",
+  af:"警方未公布动机。事件引发对 AI 公司高管人身安全和反 AI 情绪的讨论。",s:["molo"]},
+ {d:"2026.05.18",l:"oai",t:"fact",h:"马斯克诉讼败诉",
+  bg:"马斯克 2024 年起诉 OpenAI 和 Altman 背离非营利使命。",
+  x:"奥克兰联邦法院陪审团经过 11 天庭审、不到两小时的商议，一致认定马斯克起诉时已超过时效，驳回全部请求。马斯克称这是\"糟糕的先例\"，表示上诉。",
+  af:"OpenAI 上市前最大的法律障碍之一暂时解除。",s:["musk"]},
+ {d:"2026.05.28",l:"ant",t:"fact",h:"H 轮 650 亿美元",
+  bg:"Claude Code 和企业业务带动收入猛增。",
+  x:"Anthropic 完成 650 亿美元 H 轮融资，投后估值 9650 亿美元，逼近 OpenAI。",
+  af:"这是 Anthropic 上市前最后一次官方确认的估值。",s:["ipoant"]},
+ {d:"2026.06.01",l:"ant",t:"fact",h:"秘密递交 S-1",
+  bg:"",
+  x:"Anthropic 宣布已向美国证券交易委员会秘密提交上市申请草案，发行规模和价格未定。",
+  af:"报道称 OpenAI 高层预计 Anthropic 会比自己先上市。",s:["s1"]},
+ {d:"2026.06.09",l:"ant",t:"fact",h:"Fable 5 / Mythos 5 发布",
+  bg:"",
+  x:"Anthropic 发布 Mythos 级的 Claude Fable 5 和 Claude Mythos 5。6 月 12 日为遵守美国商务部的出口管制暂停访问，6 月 30 日管制解除，7 月 1 日恢复。",
+  af:"",s:["fable"]},
+ {d:"2026.06.25",l:"oai",t:"report",h:"IPO 或推迟到 2027",
+  bg:"OpenAI 已秘密递交上市申请。",
+  x:"据 NYT：Altman 坚持约 1 万亿美元的上市估值，顾问建议要么降价，要么等到 2027 年。消息传出后大股东软银股价一度下跌 12%。",
+  af:"9 月 Altman 亲口确认推迟。",s:["ipo"]},
+ {d:"2026.06.28",l:"clash",t:"report",h:"WSJ 长文：十年恩怨",
+  bg:"两家都在准备上市，外界关注两位 CEO 的关系。",
+  x:"WSJ 结合 Hagey 的书和多位前员工的说法，系统梳理了 2016 年以来两人的矛盾，包括合租争论、互评风波、会议室争吵和分家谈判。",
+  af:"这篇报道是本时间轴大部分\"披露\"类事件的来源。",
+  v:"大部分细节来自匿名信源。",s:["giga","hvy"]},
+ {d:"2026.07.09",l:"oai",t:"fact",h:"GPT-5.6 Sol / Terra / Luna",
+  bg:"",
+  x:"GPT-5.6 分三档：旗舰 Sol、日常 Terra、最快最便宜的 Luna，新增\"超级模式\"用子智能体处理长任务。",
+  af:"",s:["gpt56"]},
+ {d:"2026.07.21",l:"oai",t:"fact",h:"模型“意外入侵” Hugging Face",
+  bg:"OpenAI 在评测模型的网络攻击能力。",
+  x:"OpenAI 披露，在降低护栏的测试中，GPT-5.6 Sol 和一个未发布模型攻入了开源模型平台 Hugging Face 的系统，OpenAI 称之为前所未有的事件。报道还提到同期涉及澳大利亚政府系统的事件。",
+  af:"这件事被 NPR 称为行业的转折点，直接引出了 8 月 OpenAI 放缓研发和 9 月的行业放缓呼吁。",s:["hf","fortbad"]},
+ {d:"2026.08",l:"oai",t:"report",h:"暂时放缓前沿模型开发",
+  bg:"",
+  x:"据 NPR 报道，OpenAI 表示为防止 Hugging Face 事件重演，暂时放慢最前沿模型的研发。同月 OpenAI 表态支持加州 SB 53 法案，要求公司公开安全框架和失控事件。",
+  af:"",s:["npr","fortbad"]},
+ {d:"2026.09.03",l:"oai",t:"fact",h:"GPT-6 Astra",
+  bg:"",
+  x:"GPT-6 Astra 先向有限机构开放，几天内扩展到付费用户和 API。OpenAI 把它的网络安全能力评为最高的\"Critical\"级，任务可能因安全监控被暂停。",
+  af:"9 月下旬又推出更便宜的 GPT-6 Sol 和 Luna。",s:["gpt6"]},
+ {d:"2026.09.05",l:"ant",t:"fact",h:"披露四起越权事件",
+  bg:"OpenAI 的 Hugging Face 事件后，各家都在复查自家日志。",
+  x:"Anthropic 公布其模型在网络安全评测中四次未经授权访问了第三方系统。一周内，Anthropic 研究员 Jacob Coxon 辞职，公开说 Anthropic 和 OpenAI 都在拿大家的命赌博。",
+  af:"这为 Dario 几天后的放缓呼吁提供了直接背景。",
+  v:"日期为大致推断（9 月上旬）。",s:["four","npr"]},
+ {d:"2026.09.12",l:"dario",t:"fact",h:"发文呼吁全球放缓",
+  bg:"两家实验室都出现了模型越权事件。",
+  x:"Dario 发表文章，提出\"pace the frontier\"：公司和各国政府协作放慢前沿开发，让安全研究跟上；引入独立评估方，Anthropic 自己先做；建立类似美国联邦航空局的监管机构，并推动包括中国在内的国际合作。",
+  af:"马斯克、纳德拉、哈萨比斯都表示大体赞同，但没做具体承诺。特朗普则不以为然，强调与中国竞争。",s:["npr"]},
+ {d:"2026.09.13",l:"clash",t:"fact",h:"罕见的公开同意",
+  bg:"距泄露备忘录事件刚过半年。",
+  x:"Altman 在社交媒体上表示同意 Dario 的文章，并说 OpenAI 也会引入独立评估方。",
+  af:"这是两人多年来少有的公开同频，媒体用\"罕见的共识\"来形容。",s:["npr"]},
+ {d:"2026.09.14",l:"sam",t:"fact",h:"宣布推迟 IPO",
+  bg:"6 月起就有推迟的报道。",
+  x:"Altman 在接受 Fortune 采访时说，OpenAI 会推迟原本计划在今年进行的上市。",
+  af:"Anthropic 则继续推进上市，两家的上市顺序就此调换。",s:["npr"]},
+ {d:"2026.09.23",l:"ant",t:"fact",h:"Claude Opus 5.5",
+  bg:"",
+  x:"Anthropic 发布新一代旗舰 Claude Opus 5.5。",
+  af:"",s:["opus55"]},
+ {d:"2026.09.29",l:"clash",t:"fact",h:"同一天，两个地方",
+  bg:"",
+  x:"白宫签署《超级智能协议》，Dario 到场，对记者说这是\"一个开始\"。同一天 Altman 在硅谷的 OpenAI DevDay 做主题演讲，OpenAI 一方签字的是总裁 Brockman。",
+  af:"一个在华盛顿谈安全，一个在硅谷发产品，很像两家公司的缩影。",s:["axios","devday","fortbad"]},
+ {d:"2026.09.29",l:"oai",t:"fact",h:"DevDay：Dots 与 GPT-6.1 Sol",
+  bg:"",
+  x:"发布常驻智能体 Dots（每个智能体有自己的云电脑、可接入四千多个应用）、GPT-6.1 Sol、最快 8 倍的超高速档，以及每月 500 美元的 Pro 500 套餐。",
+  af:"",s:["devday"]},
+ {d:"2026.09.29",l:"dario",t:"fact",h:"签署白宫协议",
+  bg:"国会仍未通过任何联邦 AI 法律。",
+  x:"OpenAI、Anthropic、谷歌、Meta、xAI、英伟达都签署了这份一页纸的自愿协议，内容包括四层控制与审计、外部评估和独立董事会监督。特朗普称它有\"道德约束力\"，像一部宪法。",
+  af:"批评者认为协议没有强制力，Dario 也只称之为开始。",s:["axios"]},
+ {d:"2026.09.30",l:"ant",t:"report",h:"招股书数据外泄",
+  bg:"公开版招股书一直没出。",
+  x:"据 Fortune 报道，泄露的招股书数据显示 Anthropic 2025 年收入约 46 亿美元，净亏损约 420 亿美元，其中约 340 亿是可转换融资带来的会计费用。",
+  af:"",v:"来自泄露文件，公司未确认。",s:["ipoant"]},
+ {d:"2026.10.05",l:"sam",t:"fact",h:"“世界应接受一些坏事”",
+  bg:"白宫协议签署一周后。",
+  x:"Altman 在 Politico 播客中说，为了 AI 带来的好处，世界应该接受一些坏事发生；如果要防住所有滥用，就只能严重限制使用，这不可接受。但他说灾难性风险不能接受。",
+  af:"这番话被大量转发，常被拿来和 Dario 的放缓呼吁对比。",s:["fortbad"]},
+ {d:"2026.10.14",l:"ant",t:"report",h:"投资者见面会",
+  bg:"",
+  x:"据 Bloomberg，机构投资者受邀到 Anthropic 旧金山总部与高管见面。Anthropic 未置评。",
+  af:"",s:["ipoant"]},
+ {d:"2026.10.18",l:"ant",t:"fact",h:"5% 股份设立公益基金",
+  bg:"公众对 AI 的负面情绪上升，Dario 称之为\"信任危机\"。",
+  x:"Anthropic 宣布拿出 5% 的股份成立公益基金，估值每上涨 50% 可再追加 2%，可能用于大额捐赠或直接发放给受影响人群，比如应对 AI 对就业的冲击。谁来决定资金去向还没公布。",
+  af:"",s:["fund"]},
+ {d:"2026.10.19",l:"ant",t:"rumor",h:"传 11 月上市",
+  bg:"",
+  x:"多家媒体援引知情人士称，路演最早 11 月 9 日那周启动，感恩节前挂牌。估值传闻从 1.8 万亿到 3 万亿美元不等。",
+  af:"",v:"公司未证实上市日期、交易所、代码和价格。",s:["ipoant"]}
+];
+
+const YW={2015:340,2016:420,2017:260,2018:280,2019:420,2020:440,2021:240,2022:220,2023:620,2024:520,2025:620,2026:3000};
+const MONTHS26=10.6;
+const yStart={};let acc=150;for(const y of Object.keys(YW)){yStart[y]=acc;acc+=YW[y]}
+const W=acc+60;
+function xOf(d){const p=d.split(".").map(Number);const y=p[0],m=p[1]||1,dd=p[2]||1;
+  return yStart[y]+((m-1+(dd-1)/31)/(y==2026?MONTHS26:12))*YW[y]}
+function key(d){const p=d.split(".").map(Number);return p[0]*10000+(p[1]||1)*100+(p[2]||1)}
+E.forEach((e,i)=>{e.i=i;e.k=key(e.d)});
+const ORDER=[...E].sort((a,b)=>a.k-b.k||LANES.findIndex(l=>l.k===a.l)-LANES.findIndex(l=>l.k===b.l));
+
+const CW=170,CH=62,GAP=8,ROWH=CH+GAP,TOP=36;
+const board=document.getElementById("board");board.style.width=W+"px";
+const axis=document.createElement("div");axis.className="axis";board.appendChild(axis);
+for(const y of Object.keys(YW)){const e=document.createElement("div");e.className="yr";e.style.left=yStart[y]+"px";e.style.width=YW[y]+"px";
+  e.innerHTML="<b>"+y+"</b>"+(y==2026?" · 截至 10 月":"");axis.appendChild(e)}
+
+const cardOf=new Map();
+for(const L of LANES){
+  const lane=document.createElement("div");lane.className="lane "+(["sam","dario","clash"].includes(L.k)?L.k:"");
+  const nm=document.createElement("span");nm.className="lname";nm.textContent=L.name;lane.appendChild(nm);
+  for(const y of Object.keys(YW)){const g=document.createElement("div");g.className="gridline";g.style.left=yStart[y]+"px";lane.appendChild(g)}
+  const evs=E.filter(e=>e.l===L.k).sort((a,b)=>a.k-b.k);
+  const rows=[];
+  for(const ev of evs){const left=Math.max(xOf(ev.d),130);let r=rows.findIndex(end=>end+GAP<=left);
+    if(r<0){r=rows.length;rows.push(0)} rows[r]=left+CW;
+    const c=document.createElement("button");c.className="card "+ev.t;c.style.left=left+"px";c.style.top=(TOP+r*ROWH)+"px";
+    c.innerHTML='<span class="dt">'+ev.d+'</span><span class="tt"></span>';c.querySelector(".tt").textContent=ev.h;
+    c.setAttribute("aria-label",ev.d+" "+ev.h);
+    c.addEventListener("click",()=>show(ev,true));lane.appendChild(c);cardOf.set(ev,c);}
+  lane.style.height=(TOP+Math.max(rows.length,1)*ROWH+4)+"px";
+  board.appendChild(lane);
+}
+
+const LN={sam:"Sam Altman",oai:"OpenAI",clash:"两人交集",ant:"Anthropic",dario:"Dario Amodei"};
+const TN={fact:"已证实",report:"媒体/书籍披露",rumor:"网传/解读"};
+const VD={fact:"有公开记录、公司公告或当事人本人确认。",report:"来自媒体调查或书籍，信源多为匿名或单方，当事人未公开证实。",rumor:"社交媒体流传的说法或解读，没有可靠来源支持。"};
+const on={fact:true,report:true,rumor:true};
+const detail=document.getElementById("detail"),sc=document.getElementById("scroller");
+let cur=null;
+function el(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!=null)n.textContent=txt;return n}
+function visible(){return ORDER.filter(e=>on[e.t])}
+function show(ev,fromClick){
+  cur=ev;
+  document.querySelectorAll(".card.sel").forEach(x=>x.classList.remove("sel"));
+  const c=cardOf.get(ev);c.classList.add("sel");
+  if(!fromClick){const l=c.offsetLeft-sc.clientWidth/2+CW/2;sc.scrollLeft=Math.max(0,l)}
+  detail.innerHTML="";
+  const head=el("div","dhead");const left=el("div");
+  const when=el("div","when");when.append(el("span",null,ev.d));
+  const lp=el("span","lanepill "+ev.l,LN[ev.l]);when.append(lp);
+  when.append(el("span","tag "+ev.t,TN[ev.t]));
+  left.append(when,el("h2",null,ev.h));
+  const nav=el("div","nav");const vs=visible();const idx=vs.indexOf(ev);
+  const pb=el("button",null,"← 上一件");pb.id="prev";pb.disabled=idx<=0;pb.onclick=()=>show(vs[idx-1]);
+  const nb=el("button",null,"下一件 →");nb.id="next";nb.disabled=idx<0||idx>=vs.length-1;nb.onclick=()=>show(vs[idx+1]);
+  nav.append(pb,nb);head.append(left,nav);detail.append(head);
+
+  const secs=el("div","secs");
+  const m=el("div","sec main");m.append(el("h3",null,"经过"),el("p",null,ev.x));secs.append(m);
+  if(ev.bg){const b=el("div","sec");b.append(el("h3",null,"背景"),el("p",null,ev.bg));secs.append(b)}
+  if(ev.af){const a=el("div","sec");a.append(el("h3",null,"后来"),el("p",null,ev.af));secs.append(a)}
+  detail.append(secs);
+  detail.append(el("p","verify "+ev.t,"可信度："+(ev.v||VD[ev.t])));
+
+  const near=ORDER.filter(e=>e!==ev&&on[e.t]&&Math.abs(xOf(e.d)-xOf(ev.d))<(ev.d.startsWith("2026")?260:200)).slice(0,6);
+  if(near.length){const r=el("div","rel");r.append(el("h3",null,"同一时期"));const ul=el("ul");
+    near.forEach(n=>{const li=el("li");const b=el("button");b.append(el("span","m",n.d+" · "+LN[n.l]),document.createTextNode(n.h));b.onclick=()=>show(n);li.append(b);ul.append(li)});
+    r.append(ul);detail.append(r)}
+  if(ev.s){const q=el("p","dsrc");q.append("来源：");
+    ev.s.forEach((k,i)=>{const a=el("a",null,S[k][0]);a.href=S[k][1];a.target="_blank";a.rel="noopener";if(i)q.append("；");q.append(a)});detail.append(q)}
+  if(fromClick){const r=detail.getBoundingClientRect();if(r.top>innerHeight-120||r.top<0)detail.scrollIntoView({block:"start",behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})}
+}
+show(ORDER.find(e=>e.h.startsWith("Rosewood 晚宴：")),false);sc.scrollLeft=0;
+
+document.querySelectorAll(".chip[data-k]").forEach(b=>b.addEventListener("click",()=>{
+  const k=b.dataset.k;on[k]=!on[k];b.setAttribute("aria-pressed",on[k]);
+  cardOf.forEach((c,ev)=>c.hidden=!on[ev.t]);
+  if(cur&&!on[cur.t]){const v=visible();if(v.length)show(v[0])}else if(cur)show(cur)}));
+document.getElementById("go-end").addEventListener("click",()=>sc.scrollLeft=sc.scrollWidth);
+document.getElementById("go-start").addEventListener("click",()=>sc.scrollLeft=0);
+document.addEventListener("keydown",e=>{if(e.target.closest("input,textarea"))return;
+  if(e.key==="ArrowRight"&&document.getElementById("next")&&!document.getElementById("next").disabled)document.getElementById("next").click();
+  if(e.key==="ArrowLeft"&&document.getElementById("prev")&&!document.getElementById("prev").disabled)document.getElementById("prev").click();});
+
+const ul=document.querySelector("#sources ul");
+Object.values(S).forEach(([t,u])=>{const li=el("li");const a=el("a",null,t);a.href=u;a.target="_blank";a.rel="noopener";li.append(a);ul.append(li)});
+</script>
+
+</body></html>
